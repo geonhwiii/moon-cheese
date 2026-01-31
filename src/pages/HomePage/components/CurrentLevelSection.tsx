@@ -1,43 +1,13 @@
 import { Box, Flex, styled } from 'styled-system/jsx';
 import { ProgressBar, Spacing, Text } from '@/ui-lib';
-import { queryOptions, useSuspenseQueries } from '@tanstack/react-query';
-import { http } from '@/utils/http';
+import { useSuspenseQueries } from '@tanstack/react-query';
+import { meQueryOptions, gradePointListQueryOptions } from '../api/home-queries';
 
-interface MeResponse {
-  point: number;
-  grade: 'EXPLORER' | 'PILOT' | 'COMMANDER';
-}
-
-const getMeQueryOptions = () => {
-  return queryOptions({
-    queryKey: ['me'],
-    queryFn: () => http.get<MeResponse>('/api/me'),
-  });
-};
-
-interface GradePoint {
-  type: 'EXPLORER' | 'PILOT' | 'COMMANDER';
-  minPoint: number;
-}
-
-interface GradePointListResponse {
-  gradePointList: {
-    type: 'EXPLORER' | 'PILOT' | 'COMMANDER';
-    minPoint: number;
-  }[];
-}
-
-const getGradePointListQueryOptions = () => {
-  return queryOptions({
-    queryKey: ['grade-point-list'],
-    queryFn: () => http.get<GradePointListResponse>('/api/grade/point'),
-    select: data => data.gradePointList,
-  });
-};
+type GradePoint = { type: string; minPoint: number };
 
 export default function CurrentLevelSection() {
   const [{ data: me }, { data: gradePointList }] = useSuspenseQueries({
-    queries: [getMeQueryOptions(), getGradePointListQueryOptions()],
+    queries: [meQueryOptions(), gradePointListQueryOptions()],
   });
 
   const { progress, pointsToNextGrade } = getNextGradeInfo(me.grade, me.point, gradePointList);

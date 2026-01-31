@@ -1,28 +1,11 @@
 import { Flex, styled } from 'styled-system/jsx';
 import { Spacing, Text } from '@/ui-lib';
 import { Price } from '@/components/Price';
-import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
-import { http } from '@/utils/http';
-
-interface RecentPurchaseListResponse {
-  recentProducts: {
-    id: number;
-    thumbnail: string;
-    name: string;
-    price: number;
-  }[];
-}
-
-const getRecentPurchaseListQueryOptions = () => {
-  return queryOptions({
-    queryKey: ['recent-purchase-list'],
-    queryFn: () => http.get<RecentPurchaseListResponse>('/api/recent/product/list'),
-    select: data => data.recentProducts,
-  });
-};
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { recentPurchaseListQueryOptions } from '../api/home-queries';
 
 export default function RecentPurchaseSection() {
-  const { data: recentProducts } = useSuspenseQuery(getRecentPurchaseListQueryOptions());
+  const { data: recentProducts } = useSuspenseQuery(recentPurchaseListQueryOptions());
 
   return (
     <styled.section css={{ px: 5, pt: 4, pb: 8 }}>
