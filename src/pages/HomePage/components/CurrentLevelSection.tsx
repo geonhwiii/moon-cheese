@@ -1,36 +1,46 @@
 import { Box, Flex, styled } from 'styled-system/jsx';
 import { ProgressBar, Spacing, Text } from '@/ui-lib';
-import { queryOptions, useQuery, useSuspenseQueries } from '@tanstack/react-query';
+import { queryOptions, useSuspenseQueries } from '@tanstack/react-query';
 import { http } from '@/utils/http';
+
+interface MeResponse {
+  point: number;
+  grade: 'EXPLORER' | 'PILOT' | 'COMMANDER';
+}
 
 const getMeQueryOptions = () => {
   return queryOptions({
     queryKey: ['me'],
-    queryFn: () =>
-      http.get<{
-        point: number;
-        grade: 'EXPLORER' | 'PILOT' | 'COMMANDER';
-      }>('/api/me'),
+    queryFn: () => http.get<MeResponse>('/api/me'),
   });
 };
+
+interface GradePoint {
+  type: 'EXPLORER' | 'PILOT' | 'COMMANDER';
+  minPoint: number;
+}
+
+interface GradePointListResponse {
+  gradePointList: {
+    type: 'EXPLORER' | 'PILOT' | 'COMMANDER';
+    minPoint: number;
+  }[];
+}
 
 const getGradePointListQueryOptions = () => {
   return queryOptions({
     queryKey: ['grade-point-list'],
-    queryFn: () =>
-      http.get<{
-        gradePointList: {
-          type: 'EXPLORER' | 'PILOT' | 'COMMANDER';
-          minPoint: number;
-        }[];
-      }>('/api/grade/point'),
+    queryFn: () => http.get<GradePointListResponse>('/api/grade/point'),
+    select: data => data.gradePointList,
   });
 };
 
 export default function CurrentLevelSection() {
-  const [{ data: meData, data: gradePointListData }] = useSuspenseQueries({
+  const [{ data: me }, { data: gradePointList }] = useSuspenseQueries({
     queries: [getMeQueryOptions(), getGradePointListQueryOptions()],
   });
+
+  const { progress, pointsToNextGrade } = getNextGradeInfo(me.grade, me.point, gradePointList);
 
   return (
     <styled.section css={{ px: 5, py: 4 }}>
@@ -40,23 +50,25 @@ export default function CurrentLevelSection() {
 
       <Box bg="background.01_white" css={{ px: 5, py: 4, rounded: '2xl' }}>
         <Flex flexDir="column" gap={2}>
-          <Text variant="H2_Bold">{meData?.grade}</Text>
+          <Text variant="H2_Bold">{me.grade}</Text>
 
-          <ProgressBar value={0.6} size="xs" />
+          <ProgressBar value={progress} size="xs" />
 
           <Flex justifyContent="space-between">
             <Box textAlign="left">
               <Text variant="C1_Bold">현재 포인트</Text>
               <Text variant="C2_Regular" color="neutral.03_gray">
-                {meData?.point}p
+                {me.point}p
               </Text>
             </Box>
-            <Box textAlign="right">
-              <Text variant="C1_Bold">다음 등급까지</Text>
-              <Text variant="C2_Regular" color="neutral.03_gray">
-                1.5p
-              </Text>
-            </Box>
+            {pointsToNextGrade > 0 && (
+              <Box textAlign="right">
+                <Text variant="C1_Bold">다음 등급까지</Text>
+                <Text variant="C2_Regular" color="neutral.03_gray">
+                  {pointsToNextGrade}p
+                </Text>
+              </Box>
+            )}
           </Flex>
         </Flex>
       </Box>
@@ -64,10 +76,53 @@ export default function CurrentLevelSection() {
   );
 }
 
-CurrentLevelSection.Loading = () => {
+function getNextGradeInfo(currentGrade: string, currentPoint: number, gradePointList: GradePoint[]) {
+  const sortedList = [...gradePointList].sort((a, b) => a.minPoint - b.minPoint);
+  const currentIndex = sortedList.findIndex(g => g.type === currentGrade);
+  const isMaxGrade = currentIndex === sortedList.length - 1;
+
+  if (isMaxGrade) {
+    return { progress: 1, pointsToNextGrade: 0 };
+  }
+
+  const currentMinPoint = sortedList[currentIndex].minPoint;
+  const nextMinPoint = sortedList[currentIndex + 1].minPoint;
+
+  const progress = (currentPoint - currentMinPoint) / (nextMinPoint - currentMinPoint);
+  const pointsToNextGrade = nextMinPoint - currentPoint;
+
+  return { progress, pointsToNextGrade };
+}
+
+CurrentLevelSection.Skeleton = () => {
   return (
     <styled.section css={{ px: 5, py: 4 }}>
       <Text variant="H1_Bold">현재 등급</Text>
+
+      <Spacing size={4} />
+
+      <Box bg="background.01_white" css={{ px: 5, py: 4, rounded: '2xl' }}>
+        <Flex flexDir="column" gap={2}>
+          <Text variant="H2_Bold"> </Text>
+
+          <ProgressBar value={0} size="xs" />
+
+          <Flex justifyContent="space-between">
+            <Box textAlign="left">
+              <Text variant="C1_Bold">현재 포인트</Text>
+              <Text variant="C2_Regular" color="neutral.03_gray">
+                {' '}
+              </Text>
+            </Box>
+            <Box textAlign="right">
+              <Text variant="C1_Bold">다음 등급까지</Text>
+              <Text variant="C2_Regular" color="neutral.03_gray">
+                {' '}
+              </Text>
+            </Box>
+          </Flex>
+        </Flex>
+      </Box>
     </styled.section>
   );
 };

@@ -3,14 +3,17 @@ import BannerSection from './components/BannerSection';
 import CurrentLevelSection from './components/CurrentLevelSection';
 import ProductListSection from './components/ProductListSection';
 import RecentPurchaseSection from './components/RecentPurchaseSection';
+import { ErrorBoundary } from 'react-error-boundary';
 
 function HomePage() {
   return (
     <>
       <BannerSection />
-      <Suspense fallback={<CurrentLevelSection.Loading />}>
-        <CurrentLevelSection />
-      </Suspense>
+      <ErrorBoundary fallback={null}>
+        <Suspense fallback={<CurrentLevelSection.Skeleton />}>
+          <CurrentLevelSection />
+        </Suspense>
+      </ErrorBoundary>
       <RecentPurchaseSection />
       <ProductListSection />
     </>
