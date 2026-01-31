@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import BannerSection from './components/BannerSection';
 import CurrentLevelSection from './components/CurrentLevelSection';
 import ProductListSection from './components/ProductListSection';
@@ -7,7 +8,9 @@ function HomePage() {
   return (
     <>
       <BannerSection />
-      <CurrentLevelSection />
+      <Suspense fallback={<CurrentLevelSection.Loading />}>
+        <CurrentLevelSection />
+      </Suspense>
       <RecentPurchaseSection />
       <ProductListSection />
     </>

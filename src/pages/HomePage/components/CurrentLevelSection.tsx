@@ -1,7 +1,37 @@
 import { Box, Flex, styled } from 'styled-system/jsx';
 import { ProgressBar, Spacing, Text } from '@/ui-lib';
+import { queryOptions, useQuery, useSuspenseQueries } from '@tanstack/react-query';
+import { http } from '@/utils/http';
 
-function CurrentLevelSection() {
+const getMeQueryOptions = () => {
+  return queryOptions({
+    queryKey: ['me'],
+    queryFn: () =>
+      http.get<{
+        point: number;
+        grade: 'EXPLORER' | 'PILOT' | 'COMMANDER';
+      }>('/api/me'),
+  });
+};
+
+const getGradePointListQueryOptions = () => {
+  return queryOptions({
+    queryKey: ['grade-point-list'],
+    queryFn: () =>
+      http.get<{
+        gradePointList: {
+          type: 'EXPLORER' | 'PILOT' | 'COMMANDER';
+          minPoint: number;
+        }[];
+      }>('/api/grade/point'),
+  });
+};
+
+export default function CurrentLevelSection() {
+  const [{ data: meData, data: gradePointListData }] = useSuspenseQueries({
+    queries: [getMeQueryOptions(), getGradePointListQueryOptions()],
+  });
+
   return (
     <styled.section css={{ px: 5, py: 4 }}>
       <Text variant="H1_Bold">현재 등급</Text>
@@ -10,7 +40,7 @@ function CurrentLevelSection() {
 
       <Box bg="background.01_white" css={{ px: 5, py: 4, rounded: '2xl' }}>
         <Flex flexDir="column" gap={2}>
-          <Text variant="H2_Bold">Explorer</Text>
+          <Text variant="H2_Bold">{meData?.grade}</Text>
 
           <ProgressBar value={0.6} size="xs" />
 
@@ -18,7 +48,7 @@ function CurrentLevelSection() {
             <Box textAlign="left">
               <Text variant="C1_Bold">현재 포인트</Text>
               <Text variant="C2_Regular" color="neutral.03_gray">
-                6p
+                {meData?.point}p
               </Text>
             </Box>
             <Box textAlign="right">
@@ -34,4 +64,10 @@ function CurrentLevelSection() {
   );
 }
 
-export default CurrentLevelSection;
+CurrentLevelSection.Loading = () => {
+  return (
+    <styled.section css={{ px: 5, py: 4 }}>
+      <Text variant="H1_Bold">현재 등급</Text>
+    </styled.section>
+  );
+};
