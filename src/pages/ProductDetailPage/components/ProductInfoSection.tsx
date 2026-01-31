@@ -1,6 +1,7 @@
 import { Button, Counter, RatingGroup, Spacing, Text } from '@/ui-lib';
 import Tag, { type TagType } from '@/ui-lib/components/tag';
 import { Box, Divider, Flex, Stack, styled } from 'styled-system/jsx';
+import { Price } from '@/components/Price';
 
 type ProductInfoSectionProps = {
   name: string;
@@ -21,7 +22,9 @@ function ProductInfoSection({ name, category, rating, price, quantity }: Product
           <RatingGroup value={rating} readOnly label={`${rating.toFixed(1)}`} />
         </Stack>
         <Spacing size={4} />
-        <Text variant="H1_Bold">${price.toFixed(2)}</Text>
+        <Text variant="H1_Bold">
+          <Price amount={price} />
+        </Text>
       </Box>
 
       <Spacing size={5} />

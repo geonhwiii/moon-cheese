@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Flex, Stack, styled } from 'styled-system/jsx';
 import { Spacing, Text } from '@/ui-lib';
 import { DeliveryIcon, RocketIcon } from '@/ui-lib/components/icons';
+import { Price } from '@/components/Price';
 
 function DeliveryMethodSection() {
   const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState<string>('Express');
@@ -76,7 +77,7 @@ function DeliveryItem({
         </Text>
       </Flex>
       <Text variant="B2_Medium" fontWeight={'semibold'} color={isSelected ? 'neutral.05_white' : 'neutral.01_black'}>
-        {price ? `$${price}` : '무료'}
+        {price ? <Price amount={price} /> : '무료'}
       </Text>
     </Flex>
   );
