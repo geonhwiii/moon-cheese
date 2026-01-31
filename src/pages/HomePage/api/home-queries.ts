@@ -1,49 +1,36 @@
 import { queryOptions } from '@tanstack/react-query';
-import { http } from '@/utils/http';
-
-interface MeResponse {
-  point: number;
-  grade: 'EXPLORER' | 'PILOT' | 'COMMANDER';
-}
-
-interface GradePointListResponse {
-  gradePointList: {
-    type: 'EXPLORER' | 'PILOT' | 'COMMANDER';
-    minPoint: number;
-  }[];
-}
-
-interface RecentPurchaseListResponse {
-  recentProducts: {
-    id: number;
-    thumbnail: string;
-    name: string;
-    price: number;
-  }[];
-}
+import { homeApi } from './home-api';
 
 export const homeQueryKeys = {
   me: () => ['me'] as const,
   gradePointList: () => ['grade-point-list'] as const,
   recentPurchaseList: () => ['recent-purchase-list'] as const,
+  productList: () => ['product-list'] as const,
 };
 
 export const meQueryOptions = () =>
   queryOptions({
     queryKey: homeQueryKeys.me(),
-    queryFn: () => http.get<MeResponse>('/api/me'),
+    queryFn: homeApi.getMe,
   });
 
 export const gradePointListQueryOptions = () =>
   queryOptions({
     queryKey: homeQueryKeys.gradePointList(),
-    queryFn: () => http.get<GradePointListResponse>('/api/grade/point'),
+    queryFn: homeApi.getGradePointList,
     select: data => data.gradePointList,
   });
 
 export const recentPurchaseListQueryOptions = () =>
   queryOptions({
     queryKey: homeQueryKeys.recentPurchaseList(),
-    queryFn: () => http.get<RecentPurchaseListResponse>('/api/recent/product/list'),
+    queryFn: homeApi.getRecentPurchaseList,
     select: data => data.recentProducts,
+  });
+
+export const productListQueryOptions = () =>
+  queryOptions({
+    queryKey: homeQueryKeys.productList(),
+    queryFn: homeApi.getProductList,
+    select: data => data.products,
   });
