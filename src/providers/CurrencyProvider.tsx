@@ -20,6 +20,7 @@ const CurrencyContext = createContext<{
   onChangeCurrency: () => {},
 });
 
+// TODO: 환율 설정은 새로고침 시 유지되면 좋으므로 localStorage에 저장하는 방식으로 변경해야 함
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const [currency, setCurrency] = useState<CurrencyType>('USD');
 
@@ -54,5 +55,9 @@ function getExchangeRateQueryOptions() {
     queryKey: ['exchange-rate'],
     queryFn: () => http.get<ExchangeRateResponse>('/api/exchange-rate'),
     select: data => data.exchangeRate,
+    staleTime: CURRENCY_CACHE_TIME,
+    gcTime: CURRENCY_CACHE_TIME,
   });
 }
+
+const CURRENCY_CACHE_TIME = 1000 * 60 * 60 * 24; // 24 hours
