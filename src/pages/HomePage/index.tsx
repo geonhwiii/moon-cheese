@@ -14,7 +14,11 @@ function HomePage() {
           <CurrentLevelSection />
         </Suspense>
       </ErrorBoundary>
-      <RecentPurchaseSection />
+      <ErrorBoundary fallback={null}>
+        <Suspense fallback={<RecentPurchaseSection.Skeleton />}>
+          <RecentPurchaseSection />
+        </Suspense>
+      </ErrorBoundary>
       <ProductListSection />
     </>
   );
