@@ -16,7 +16,18 @@ export interface GradePointListResponse {
   gradePointList: GradePoint[];
 }
 
+export interface GradeShipping {
+  type: Grade;
+  shippingFee: number;
+  freeShippingThreshold: number;
+}
+
+export interface GradeShippingListResponse {
+  gradeShippingList: GradeShipping[];
+}
+
 export const gradeApi = {
   getMe: () => http.get<MeResponse>('/api/me'),
   getGradePointList: () => http.get<GradePointListResponse>('/api/grade/point'),
+  getGradeShippingList: () => http.get<GradeShippingListResponse>('/api/grade/shipping'),
 };

@@ -4,6 +4,7 @@ import { gradeApi } from './get-grade';
 export const gradeQueryKeys = {
   me: () => ['me'] as const,
   gradePointList: () => ['grade-point-list'] as const,
+  gradeShippingList: () => ['grade-shipping-list'] as const,
 };
 
 export const meQueryOptions = () =>
@@ -17,4 +18,11 @@ export const gradePointListQueryOptions = () =>
     queryKey: gradeQueryKeys.gradePointList(),
     queryFn: gradeApi.getGradePointList,
     select: data => data.gradePointList,
+  });
+
+export const gradeShippingListQueryOptions = () =>
+  queryOptions({
+    queryKey: gradeQueryKeys.gradeShippingList(),
+    queryFn: gradeApi.getGradeShippingList,
+    select: data => data.gradeShippingList,
   });

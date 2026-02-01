@@ -6,7 +6,7 @@ import { Button, Spacing, Text } from '@/ui-lib';
 import { toast } from '@/ui-lib/components/toast';
 import { delay } from '@/utils/async';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { meQueryOptions } from '@/entities/grade/api/grade-queries';
+import { gradeShippingListQueryOptions, meQueryOptions } from '@/entities/grade/api/grade-queries';
 import { productListQueryOptions } from '@/entities/product/api/product-queries';
 import { useCartStore } from '@/stores/cart-store';
 import { Price } from '@/components/Price';
@@ -23,11 +23,12 @@ function CheckoutSection({ deliveryMethod }: CheckoutSectionProps) {
 
   const { data: me } = useSuspenseQuery(meQueryOptions());
   const { data: productList } = useSuspenseQuery(productListQueryOptions());
+  const { data: gradeShippingList } = useSuspenseQuery(gradeShippingListQueryOptions());
   const { items, totalCount, clearCart } = useCartStore();
 
   const totalAmount = calculateTotalAmount(items, productList);
 
-  const deliveryFee = calculateDeliveryFee({ method: deliveryMethod, grade: me.grade, totalAmount });
+  const deliveryFee = calculateDeliveryFee({ method: deliveryMethod, grade: me.grade, totalAmount, gradeShippingList });
   const totalPrice = totalAmount + deliveryFee;
 
   const onClickPurchase = async () => {
