@@ -2,7 +2,7 @@ import { Flex, Stack, styled } from 'styled-system/jsx';
 import { Spacing, Text } from '@/ui-lib';
 import { DeliveryIcon, RocketIcon } from '@/ui-lib/components/icons';
 import { Price } from '@/components/Price';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useSuspenseQueries } from '@tanstack/react-query';
 import { gradeShippingListQueryOptions, meQueryOptions } from '@/entities/grade/api/grade-queries';
 import { productListQueryOptions } from '@/entities/product/api/product-queries';
 import { useCartStore } from '@/stores/cart-store';
@@ -15,9 +15,9 @@ interface DeliveryMethodSectionProps {
 }
 
 function DeliveryMethodSection({ selectedMethod, onSelectMethod }: DeliveryMethodSectionProps) {
-  const { data: me } = useSuspenseQuery(meQueryOptions());
-  const { data: productList } = useSuspenseQuery(productListQueryOptions());
-  const { data: gradeShippingList } = useSuspenseQuery(gradeShippingListQueryOptions());
+  const [{ data: me }, { data: productList }, { data: gradeShippingList }] = useSuspenseQueries({
+    queries: [meQueryOptions(), productListQueryOptions(), gradeShippingListQueryOptions()],
+  });
   const items = useCartStore(state => state.items);
 
   const totalAmount = calculateTotalAmount(items, productList);

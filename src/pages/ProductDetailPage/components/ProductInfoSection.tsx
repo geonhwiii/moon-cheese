@@ -15,7 +15,7 @@ const ParamsSchema = z.object({
 
 export default function ProductInfoSection() {
   const { id } = ParamsSchema.parse(useParams());
-  const [selectedQuantity, setSelectedQuantity] = useState(0);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
 
   const { data } = useSuspenseQuery(productDetailQueryOptions(id));
 
@@ -53,7 +53,7 @@ export default function ProductInfoSection() {
         <Counter.Root>
           <Counter.Minus
             onClick={() => setSelectedQuantity(prev => prev - 1)}
-            disabled={isInCart || selectedQuantity === 0}
+            disabled={isInCart || selectedQuantity <= 1}
           />
           <Counter.Display value={isInCart ? cartItem.quantity : selectedQuantity} />
           <Counter.Plus
