@@ -7,11 +7,15 @@ import { Price } from '@/components/Price';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { productListQueryOptions } from '../api/home-queries';
 import type { Product } from '../api/home-api';
+import { useCartStore } from '@/stores/cart-store';
 
 export default function ProductListSection() {
   const [currentCategory, setCurrentCategory] = useState('all');
   const navigate = useNavigate();
   const { data: productList } = useSuspenseQuery(productListQueryOptions());
+  const { items, addItem, removeItem } = useCartStore();
+
+  const getQuantity = (productId: number) => items.find(item => item.productId === productId)?.quantity ?? 0;
 
   const matchesCategory = (product: Product) =>
     currentCategory === 'all' || product.category === currentCategory.toUpperCase();
@@ -54,9 +58,20 @@ export default function ProductListSection() {
               {renderFreeTag(product)}
             </ProductItem.Meta>
             <Counter.Root>
-              <Counter.Minus onClick={() => {}} disabled={true} />
-              <Counter.Display value={0} />
-              <Counter.Plus onClick={() => {}} />
+              <Counter.Minus
+                onClick={e => {
+                  e.stopPropagation();
+                  removeItem(product.id);
+                }}
+                disabled={getQuantity(product.id) === 0}
+              />
+              <Counter.Display value={getQuantity(product.id)} />
+              <Counter.Plus
+                onClick={e => {
+                  e.stopPropagation();
+                  addItem(product.id);
+                }}
+              />
             </Counter.Root>
           </ProductItem.Root>
         ))}
