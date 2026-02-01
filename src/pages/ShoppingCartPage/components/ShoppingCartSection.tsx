@@ -54,7 +54,7 @@ function ShoppingCartSection() {
                       <Price amount={product.price} />
                     </ShoppingCartItem.Price>
                     <Counter.Root>
-                      <Counter.Minus onClick={() => removeItem(item.productId)} disabled={item.quantity === 1} />
+                      <Counter.Minus onClick={() => removeItem(item.productId)} />
                       <Counter.Display value={item.quantity} />
                       <Counter.Plus onClick={() => addItem(item.productId)} disabled={item.quantity >= product.stock} />
                     </Counter.Root>

@@ -5,15 +5,36 @@ import { SECOND } from '@/constants/time';
 import { Button, Spacing, Text } from '@/ui-lib';
 import { toast } from '@/ui-lib/components/toast';
 import { delay } from '@/utils/async';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { meQueryOptions } from '@/entities/grade/api/grade-queries';
+import { productListQueryOptions } from '@/entities/product/api/product-queries';
+import { useCartStore } from '@/stores/cart-store';
+import { Price } from '@/components/Price';
+import { calculateDeliveryFee, type DeliveryMethod } from '../utils/calculate-delivery-fee';
+import { calculateTotalAmount } from '../utils/calculate-total-amount';
 
-function CheckoutSection() {
+interface CheckoutSectionProps {
+  deliveryMethod: DeliveryMethod;
+}
+
+function CheckoutSection({ deliveryMethod }: CheckoutSectionProps) {
   const navigate = useNavigate();
   const [isPurchasing, setIsPurchasing] = useState(false);
+
+  const { data: me } = useSuspenseQuery(meQueryOptions());
+  const { data: productList } = useSuspenseQuery(productListQueryOptions());
+  const { items, totalCount, clearCart } = useCartStore();
+
+  const totalAmount = calculateTotalAmount(items, productList);
+
+  const deliveryFee = calculateDeliveryFee({ method: deliveryMethod, grade: me.grade, totalAmount });
+  const totalPrice = totalAmount + deliveryFee;
 
   const onClickPurchase = async () => {
     setIsPurchasing(true);
     await delay(SECOND * 1);
     setIsPurchasing(false);
+    clearCart();
     toast.success('결제가 완료되었습니다.');
     await delay(SECOND * 2);
     navigate('/');
@@ -37,15 +58,17 @@ function CheckoutSection() {
         <Stack gap={5}>
           <Box gap={3}>
             <Flex justify="space-between">
-              <Text variant="B2_Regular">주문금액(3개)</Text>
-              <Text variant="B2_Bold" color="state.green">
-                무료배송
+              <Text variant="B2_Regular">주문금액({totalCount}개)</Text>
+              <Text variant="B2_Bold">
+                <Price amount={totalAmount} />
               </Text>
             </Flex>
             <Spacing size={3} />
             <Flex justify="space-between">
               <Text variant="B2_Regular">배송비</Text>
-              <Text variant="B2_Bold">무료</Text>
+              <Text variant="B2_Bold" color={deliveryFee === 0 ? 'state.green' : undefined}>
+                {deliveryFee === 0 ? '무료' : <Price amount={deliveryFee} />}
+              </Text>
             </Flex>
           </Box>
 
@@ -53,7 +76,9 @@ function CheckoutSection() {
 
           <HStack justify="space-between">
             <Text variant="H2_Bold">총 금액</Text>
-            <Text variant="H2_Bold">$30.59</Text>
+            <Text variant="H2_Bold">
+              <Price amount={totalPrice} />
+            </Text>
           </HStack>
         </Stack>
 

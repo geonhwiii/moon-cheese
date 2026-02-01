@@ -1,7 +1,7 @@
 import { Box, Flex, styled } from 'styled-system/jsx';
 import { ProgressBar, Spacing, Text } from '@/ui-lib';
 import { useSuspenseQueries } from '@tanstack/react-query';
-import { meQueryOptions, gradePointListQueryOptions } from '../api/home-queries';
+import { meQueryOptions, gradePointListQueryOptions } from '@/entities/grade/api/grade-queries';
 
 type GradePoint = { type: string; minPoint: number };
 

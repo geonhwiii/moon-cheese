@@ -1,11 +1,28 @@
-import { useState } from 'react';
 import { Flex, Stack, styled } from 'styled-system/jsx';
 import { Spacing, Text } from '@/ui-lib';
 import { DeliveryIcon, RocketIcon } from '@/ui-lib/components/icons';
 import { Price } from '@/components/Price';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { meQueryOptions } from '@/entities/grade/api/grade-queries';
+import { productListQueryOptions } from '@/entities/product/api/product-queries';
+import { useCartStore } from '@/stores/cart-store';
+import { calculateDeliveryFee, type DeliveryMethod } from '../utils/calculate-delivery-fee';
+import { calculateTotalAmount } from '../utils/calculate-total-amount';
 
-function DeliveryMethodSection() {
-  const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState<string>('Express');
+interface DeliveryMethodSectionProps {
+  selectedMethod: DeliveryMethod;
+  onSelectMethod: (method: DeliveryMethod) => void;
+}
+
+function DeliveryMethodSection({ selectedMethod, onSelectMethod }: DeliveryMethodSectionProps) {
+  const { data: me } = useSuspenseQuery(meQueryOptions());
+  const { data: productList } = useSuspenseQuery(productListQueryOptions());
+  const items = useCartStore(state => state.items);
+
+  const totalAmount = calculateTotalAmount(items, productList);
+
+  const expressFee = calculateDeliveryFee({ method: 'Express', grade: me.grade, totalAmount });
+  const premiumFee = calculateDeliveryFee({ method: 'Premium', grade: me.grade, totalAmount });
 
   return (
     <styled.section css={{ p: 5, bgColor: 'background.01_white' }}>
@@ -16,19 +33,19 @@ function DeliveryMethodSection() {
       <Stack gap={4}>
         <DeliveryItem
           title="Express"
-          description="3-5일 후 도착 예정"
+          description="2~3일 후 도착 예정"
           icon={<DeliveryIcon size={28} />}
-          price={0}
-          isSelected={selectedDeliveryMethod === 'Express'}
-          onClick={() => setSelectedDeliveryMethod('Express')}
+          price={expressFee}
+          isSelected={selectedMethod === 'Express'}
+          onClick={() => onSelectMethod('Express')}
         />
         <DeliveryItem
           title="Premium"
           description="당일 배송"
           icon={<RocketIcon size={28} />}
-          price={5}
-          isSelected={selectedDeliveryMethod === 'Premium'}
-          onClick={() => setSelectedDeliveryMethod('Premium')}
+          price={premiumFee}
+          isSelected={selectedMethod === 'Premium'}
+          onClick={() => onSelectMethod('Premium')}
         />
       </Stack>
     </styled.section>
