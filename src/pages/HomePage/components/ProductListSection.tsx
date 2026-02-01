@@ -5,8 +5,8 @@ import { Box, Grid, styled } from 'styled-system/jsx';
 import ProductItem from '../components/ProductItem';
 import { Price } from '@/components/Price';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { productListQueryOptions } from '../api/home-queries';
-import type { Product } from '../api/home-api';
+import { productListQueryOptions } from '@/entities/product/api/product-queries';
+import type { Product } from '@/entities/product/api/get-product';
 import { useCartStore } from '@/stores/cart-store';
 
 export default function ProductListSection() {

@@ -5,7 +5,6 @@ export const homeQueryKeys = {
   me: () => ['me'] as const,
   gradePointList: () => ['grade-point-list'] as const,
   recentPurchaseList: () => ['recent-purchase-list'] as const,
-  productList: () => ['product-list'] as const,
 };
 
 export const meQueryOptions = () =>
@@ -26,11 +25,4 @@ export const recentPurchaseListQueryOptions = () =>
     queryKey: homeQueryKeys.recentPurchaseList(),
     queryFn: homeApi.getRecentPurchaseList,
     select: data => data.recentProducts,
-  });
-
-export const productListQueryOptions = () =>
-  queryOptions({
-    queryKey: homeQueryKeys.productList(),
-    queryFn: homeApi.getProductList,
-    select: data => data.products,
   });

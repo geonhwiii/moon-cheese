@@ -3,13 +3,21 @@ import { Spacing, Text } from '@/ui-lib';
 import { useNavigate } from 'react-router';
 import { HStack, styled } from 'styled-system/jsx';
 import RecommendationProductItem from './RecommendationProductItem';
+import { useSuspenseQueries } from '@tanstack/react-query';
+import { productListQueryOptions, recommendProductIdsQueryOptions } from '@/entities/product/api/product-queries';
 
-function RecommendationSection() {
+interface RecommendationSectionProps {
+  productId: string;
+}
+
+function RecommendationSection({ productId }: RecommendationSectionProps) {
   const navigate = useNavigate();
 
-  const handleClickProduct = (productId: number) => {
-    navigate(`/product/${productId}`);
-  };
+  const [{ data: recommendProductIds }, { data: productList }] = useSuspenseQueries({
+    queries: [recommendProductIdsQueryOptions(productId), productListQueryOptions()],
+  });
+
+  const recommendProducts = productList.filter(product => recommendProductIds.includes(product.id));
 
   return (
     <styled.section css={{ bg: 'background.01_white', px: 5, pt: 5, pb: 6 }}>
@@ -18,35 +26,15 @@ function RecommendationSection() {
       <Spacing size={4} />
 
       <HStack gap={1.5} overflowX="auto">
-        <RecommendationProductItem.Root onClick={() => handleClickProduct(1)}>
-          <RecommendationProductItem.Image
-            src="/moon-cheese-images/cheese-1-1.jpg"
-            alt="월레스의 오리지널 웬슬리데일"
-          />
-          <RecommendationProductItem.Info name="월레스의 오리지널 웬슬리데일" rating={4.0} />
-          <RecommendationProductItem.Price>
-            <Price amount={12.99} />
-          </RecommendationProductItem.Price>
-        </RecommendationProductItem.Root>
-
-        <RecommendationProductItem.Root onClick={() => handleClickProduct(2)}>
-          <RecommendationProductItem.Image
-            src="/moon-cheese-images/tea-1-1.jpg"
-            alt="그로밋의 잉글리쉬 브렉퍼스트 티"
-          />
-          <RecommendationProductItem.Info name="그로밋의 잉글리쉬 브렉퍼스트 티" rating={4.0} />
-          <RecommendationProductItem.Price>
-            <Price amount={6.75} />
-          </RecommendationProductItem.Price>
-        </RecommendationProductItem.Root>
-
-        <RecommendationProductItem.Root onClick={() => handleClickProduct(3)}>
-          <RecommendationProductItem.Image src="/moon-cheese-images/cheese-3-1.jpg" alt="크래이머 블루 치즈" />
-          <RecommendationProductItem.Info name="크래이머 블루 치즈" rating={4.0} />
-          <RecommendationProductItem.Price>
-            <Price amount={15.75} />
-          </RecommendationProductItem.Price>
-        </RecommendationProductItem.Root>
+        {recommendProducts.map(product => (
+          <RecommendationProductItem.Root key={product.id} onClick={() => navigate(`/product/${product.id}`)}>
+            <RecommendationProductItem.Image src={product.images[0]} alt={product.name} />
+            <RecommendationProductItem.Info name={product.name} rating={product.rating} />
+            <RecommendationProductItem.Price>
+              <Price amount={product.price} />
+            </RecommendationProductItem.Price>
+          </RecommendationProductItem.Root>
+        ))}
       </HStack>
     </styled.section>
   );

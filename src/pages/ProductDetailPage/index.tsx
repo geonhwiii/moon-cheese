@@ -6,7 +6,7 @@ import ThumbnailSection from './components/ThumbnailSection';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router';
 import { z } from 'zod';
-import { productDetailQueryOptions } from './api/product-detail-queries';
+import { productDetailQueryOptions } from '@/entities/product/api/product-queries';
 
 const ParamsSchema = z.object({
   id: z.string(),
@@ -34,7 +34,7 @@ export default function ProductDetailPage() {
 
       <Spacing size={2.5} />
 
-      <RecommendationSection />
+      <RecommendationSection productId={id} />
     </>
   );
 }
