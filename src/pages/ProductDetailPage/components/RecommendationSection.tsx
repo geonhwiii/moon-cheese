@@ -1,20 +1,22 @@
 import { Price } from '@/components/Price';
 import { Spacing, Text } from '@/ui-lib';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { HStack, styled } from 'styled-system/jsx';
 import RecommendationProductItem from './RecommendationProductItem';
 import { useSuspenseQueries } from '@tanstack/react-query';
 import { productListQueryOptions, recommendProductIdsQueryOptions } from '@/entities/product/api/product-queries';
+import { z } from 'zod';
 
-interface RecommendationSectionProps {
-  productId: string;
-}
+const ParamsSchema = z.object({
+  id: z.string(),
+});
 
-function RecommendationSection({ productId }: RecommendationSectionProps) {
+export default function RecommendationSection() {
   const navigate = useNavigate();
+  const { id } = ParamsSchema.parse(useParams());
 
   const [{ data: recommendProductIds }, { data: productList }] = useSuspenseQueries({
-    queries: [recommendProductIdsQueryOptions(productId), productListQueryOptions()],
+    queries: [recommendProductIdsQueryOptions(id), productListQueryOptions()],
   });
 
   const recommendProducts = productList.filter(product => recommendProductIds.includes(product.id));
@@ -39,5 +41,3 @@ function RecommendationSection({ productId }: RecommendationSectionProps) {
     </styled.section>
   );
 }
-
-export default RecommendationSection;

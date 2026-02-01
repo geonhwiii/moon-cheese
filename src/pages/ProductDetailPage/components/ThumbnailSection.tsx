@@ -1,12 +1,22 @@
+import { productDetailQueryOptions } from '@/entities/product/api/product-queries';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useParams } from 'react-router';
 import { HStack, styled } from 'styled-system/jsx';
+import { z } from 'zod';
 
-type ThumbnailSectionProps = {
-  images: string[];
-};
+const ParamsSchema = z.object({
+  id: z.string(),
+});
 
-function ThumbnailSection({ images }: ThumbnailSectionProps) {
+function ThumbnailSection() {
+  const { id } = ParamsSchema.parse(useParams());
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  const { data: images } = useSuspenseQuery({
+    ...productDetailQueryOptions(id),
+    select: data => data.images,
+  });
 
   return (
     <styled.section css={{ bg: 'background.01_white' }}>
