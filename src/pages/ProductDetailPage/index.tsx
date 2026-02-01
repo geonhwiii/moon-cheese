@@ -3,27 +3,33 @@ import ProductDetailSection from './components/ProductDetailSection';
 import ProductInfoSection from './components/ProductInfoSection';
 import RecommendationSection from './components/RecommendationSection';
 import ThumbnailSection from './components/ThumbnailSection';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { useParams } from 'react-router';
+import { z } from 'zod';
+import { productDetailQueryOptions } from './api/product-detail-queries';
 
-function ProductDetailPage() {
+const ParamsSchema = z.object({
+  id: z.string(),
+});
+
+export default function ProductDetailPage() {
+  const { id } = ParamsSchema.parse(useParams());
+  const { data: productDetail } = useSuspenseQuery(productDetailQueryOptions(id));
+
   return (
     <>
-      <ThumbnailSection
-        images={[
-          '/moon-cheese-images/cracker-1-1.jpg',
-          '/moon-cheese-images/cracker-1-2.jpg',
-          '/moon-cheese-images/cracker-1-3.jpg',
-          '/moon-cheese-images/cracker-1-4.jpg',
-        ]}
+      <ThumbnailSection images={productDetail.images} />
+      <ProductInfoSection
+        name={productDetail.name}
+        category={productDetail.category.toLowerCase() as 'cheese' | 'cracker' | 'tea'}
+        rating={productDetail.rating}
+        price={productDetail.price}
+        stock={productDetail.stock}
       />
-      <ProductInfoSection name={'치즈홀 크래커'} category={'cracker'} rating={4.0} price={10.85} quantity={2} />
 
       <Spacing size={2.5} />
 
-      <ProductDetailSection
-        description={
-          '"달 표면에서 가 수확한 특별한 구멍낸 크래커." 달의 분화구를 연상시키는 다지한과 고소한 풍미가 특징인 크래커. 치즈와의 궁합을 고려한 절묘한 비율로, 어느 데어링 메뉴도 잘 어울립니다.'
-        }
-      />
+      <ProductDetailSection description={productDetail.detailDescription} />
 
       <Spacing size={2.5} />
 
@@ -31,5 +37,3 @@ function ProductDetailPage() {
     </>
   );
 }
-
-export default ProductDetailPage;

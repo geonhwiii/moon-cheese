@@ -8,10 +8,10 @@ type ProductInfoSectionProps = {
   category: TagType;
   rating: number;
   price: number;
-  quantity: number;
+  stock: number;
 };
 
-function ProductInfoSection({ name, category, rating, price, quantity }: ProductInfoSectionProps) {
+function ProductInfoSection({ name, category, rating, price, stock }: ProductInfoSectionProps) {
   return (
     <styled.section css={{ bg: 'background.01_white', p: 5 }}>
       {/* 상품 정보 */}
@@ -35,7 +35,7 @@ function ProductInfoSection({ name, category, rating, price, quantity }: Product
           <Text variant="C1_Medium">재고</Text>
           <Divider orientation="vertical" color="border.01_gray" h={4} />
           <Text variant="C1_Medium" color="secondary.02_orange">
-            {quantity}EA
+            {stock}EA
           </Text>
         </Flex>
         <Counter.Root>
