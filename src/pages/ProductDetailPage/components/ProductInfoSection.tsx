@@ -2,8 +2,11 @@ import { Button, Counter, RatingGroup, Spacing, Text } from '@/ui-lib';
 import Tag, { type TagType } from '@/ui-lib/components/tag';
 import { Box, Divider, Flex, Stack, styled } from 'styled-system/jsx';
 import { Price } from '@/components/Price';
+import { useCartStore } from '@/stores/cart-store';
+import { useState } from 'react';
 
 type ProductInfoSectionProps = {
+  productId: number;
   name: string;
   category: TagType;
   rating: number;
@@ -11,7 +14,14 @@ type ProductInfoSectionProps = {
   stock: number;
 };
 
-function ProductInfoSection({ name, category, rating, price, stock }: ProductInfoSectionProps) {
+function ProductInfoSection({ productId, name, category, rating, price, stock }: ProductInfoSectionProps) {
+  const [selectedQuantity, setSelectedQuantity] = useState(0);
+
+  const { items, addItem, deleteItem } = useCartStore();
+  const cartItem = items.find(item => item.productId === productId);
+
+  const isInCart = !!cartItem;
+
   return (
     <styled.section css={{ bg: 'background.01_white', p: 5 }}>
       {/* 상품 정보 */}
@@ -39,18 +49,39 @@ function ProductInfoSection({ name, category, rating, price, stock }: ProductInf
           </Text>
         </Flex>
         <Counter.Root>
-          <Counter.Minus onClick={() => {}} disabled={true} />
-          <Counter.Display value={3} />
-          <Counter.Plus onClick={() => {}} />
+          <Counter.Minus
+            onClick={() => setSelectedQuantity(prev => prev - 1)}
+            disabled={isInCart || selectedQuantity === 0}
+          />
+          <Counter.Display value={isInCart ? cartItem.quantity : selectedQuantity} />
+          <Counter.Plus
+            onClick={() => setSelectedQuantity(prev => prev + 1)}
+            disabled={isInCart || selectedQuantity >= stock}
+          />
         </Counter.Root>
       </Flex>
 
       <Spacing size={5} />
 
       {/* 장바구니 버튼 */}
-      <Button fullWidth color="primary" size="lg">
-        장바구니
-      </Button>
+      {isInCart ? (
+        <Button fullWidth color="neutral" size="lg" onClick={() => deleteItem(productId)}>
+          장바구니에서 제거
+        </Button>
+      ) : (
+        <Button
+          fullWidth
+          color="primary"
+          size="lg"
+          onClick={() => {
+            addItem(productId, selectedQuantity);
+            setSelectedQuantity(0);
+          }}
+          disabled={selectedQuantity === 0}
+        >
+          장바구니 담기
+        </Button>
+      )}
     </styled.section>
   );
 }

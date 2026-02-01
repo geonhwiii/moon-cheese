@@ -9,8 +9,9 @@ interface CartItem {
 interface CartStore {
   items: CartItem[];
   totalCount: number;
-  addItem: (productId: number) => void;
+  addItem: (productId: number, quantity?: number) => void;
   removeItem: (productId: number) => void;
+  deleteItem: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
 }
@@ -23,12 +24,14 @@ export const useCartStore = create<CartStore>()(
       items: [],
       totalCount: 0,
 
-      addItem: productId =>
+      addItem: (productId, quantity = 1) =>
         set(state => {
           const existing = state.items.find(item => item.productId === productId);
           const newItems = existing
-            ? state.items.map(item => (item.productId === productId ? { ...item, quantity: item.quantity + 1 } : item))
-            : [...state.items, { productId, quantity: 1 }];
+            ? state.items.map(item =>
+                item.productId === productId ? { ...item, quantity: item.quantity + quantity } : item
+              )
+            : [...state.items, { productId, quantity }];
           return { items: newItems, totalCount: calcTotalCount(newItems) };
         }),
 
@@ -41,6 +44,12 @@ export const useCartStore = create<CartStore>()(
                   item.productId === productId ? { ...item, quantity: item.quantity - 1 } : item
                 )
               : state.items.filter(item => item.productId !== productId);
+          return { items: newItems, totalCount: calcTotalCount(newItems) };
+        }),
+
+      deleteItem: productId =>
+        set(state => {
+          const newItems = state.items.filter(item => item.productId !== productId);
           return { items: newItems, totalCount: calcTotalCount(newItems) };
         }),
 

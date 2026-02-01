@@ -20,6 +20,7 @@ export default function ProductDetailPage() {
     <>
       <ThumbnailSection images={productDetail.images} />
       <ProductInfoSection
+        productId={productDetail.id}
         name={productDetail.name}
         category={productDetail.category.toLowerCase() as 'cheese' | 'cracker' | 'tea'}
         rating={productDetail.rating}
